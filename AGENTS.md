@@ -1,10 +1,9 @@
 # Build and verification
 
-- This repository uses mise for tool versions and task execution. Run tasks with `mise run <task>`; do not call `node`, `npm`, `tsc`, `prettier`, or `oxlint` directly. `mise tasks` lists every task.
-- Install local prerequisites with `brew install mise`, then run `mise trust` and `mise install` in this checkout.
-- `mise.toml` pins Node; `mise.lock` records its checksums. Bump it with `mise upgrade --bump node`, run `mise lock` and `mise run check`, set `engines.node` in `package.json` to the same version, and commit all three files.
-- `package.json` and `package-lock.json` pin the project tools (TypeScript, Prettier, Oxlint). `mise run install` runs `npm ci`; every other task depends on it, and mise skips it while `node_modules` is newer than the lockfile. Do not rely on global Prettier or Oxlint installations.
-- Run `mise run check` before handing off changes. It checks formatting, type-aware lint, TypeScript compilation, and tests without rewriting files.
+- Run tasks with `mise run <task>`; do not call `node`, `npm`, `tsc`, `prettier`, or `oxlint` directly.
+- Bump Node with `mise upgrade --bump node`, run `mise lock` and `mise run check`, set `engines.node` in `package.json` to the same version, and commit `mise.toml`, `mise.lock`, and `package.json`.
+- Do not rely on global Prettier or Oxlint installations.
+- Run `mise run check` before handing off changes.
 - Use `mise run fmt` to format tracked TypeScript files. Keep formatting out of `mise run check`.
 - Keep Oxlint's correctness rules enabled. The Node test runner owns promises returned by imported `describe`, `it`, and `test` calls, so the test-only lint configuration permits those calls without awaiting them.
 
