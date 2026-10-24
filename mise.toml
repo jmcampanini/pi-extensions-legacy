@@ -5,7 +5,7 @@ lockfile = true
 lockfile_platforms = ["linux-x64", "macos-arm64"]
 
 [tools]
-node = "22.19.0"
+node = "22.23.3"
 
 [env]
 _.path = ["{{config_root}}/node_modules/.bin"]
@@ -45,7 +45,7 @@ run = "node --test */tests/*-test.ts"
 
 [tasks.check]
 description = "Run all non-mutating checks."
-depends = ["fmt-check", "lint", "typecheck", "test"]
+depends = ["fmt-check", "lint", "build", "test"]
 
 [tasks.clean]
 description = "Remove generated TypeScript metadata."

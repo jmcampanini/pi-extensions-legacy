@@ -11,7 +11,7 @@
 
 - Tests are node:test files: `import { describe, it } from "node:test"` with `import assert from "node:assert/strict"`. One `describe` per unit under test, `it("behavior sentence", ...)` leaves with a few bare assertions; assertion messages appear only inside merged scenarios and loops.
 - Never hand-roll assertion helpers, pass/fail counters, or `process.exit` - a top-level `process.exit(0)` makes `node --test` report a file as passing even when its tests fail. Skip unavailable-dependency tests with the `skip` option instead.
-- Test files live at `<extension>/tests/<name>-test.ts` and stay standalone: both `node <file>` and `node --test <file>` work. `mise run test` runs `node --test "*/tests/*-test.ts"` with one process per file, in parallel - mutate `process.env` before a dynamic `await import(...)` only at module top, and clean up in `after()` hooks.
+- Test files live at `<extension>/tests/<name>-test.ts`. Run them through the mise test task. `mise run test` runs `node --test "*/tests/*-test.ts"` with one process per file, in parallel - mutate `process.env` before a dynamic `await import(...)` only at module top, and clean up in `after()` hooks.
 
 # When designing Pi TUI surfaces
 
