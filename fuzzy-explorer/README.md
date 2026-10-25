@@ -4,6 +4,7 @@ Keyboard-first search and navigation for the active branch of the current Pi tra
 
 Open it with `/fuzzy-explorer`. It only reads `sessionManager.getBranch()` and never changes the session leaf.
 
+
 ## Search
 
 Plain terms are ANDed. Each term fuzzy-matches a block's short search key (kind, tool name, title, and argument subtitle), or substring-matches the complete text stored in a message/result body. Separators (`- _ . / :`) are normalized with a small ranking penalty, so `sub-agent` finds `subagent` and vice versa.
@@ -16,6 +17,7 @@ Paths stay intact, so `src/config.ts` is one term. Unknown operators are treated
 
 While a query is active, results are ordered by relevance (best first; newest first among ties) and typing re-selects the top result. With an empty query the list is chronological and anchored on the newest block.
 
+
 ## Keys
 
 List mode uses arrows or `j`/`k`, `u`/`d` to page, `g`/`G` for first/last, `/` to filter, Enter or `l` for detail, `y` to copy, `o` to open, and `q` or Escape to close. In filter mode, printable keys edit the query while arrows still navigate; `Ctrl+U` clears it and Escape returns to list mode without clearing it.
@@ -25,6 +27,7 @@ Detail mode uses arrows or `j`/`k` to scroll, `u`/`d` to page, `J`/`K` to visit 
 Detail content renders as markdown for the block kinds Pi's transcript renders that way - assistant text, user text, summaries, custom messages - plus `subagent_*` tool blocks. `read` results follow their file type the way Pi's own read renderer does: `.md` and `.markdown` files render as markdown, files with an extension Pi recognizes (`.ts`, `.py`, `.json`, ...) are syntax-highlighted, and reads that failed or have no recognized extension stay raw, as does other tool and bash output. A rendered tool block starts with muted `key=value` lines of the call's arguments (`path=…`, `offset=…`) because the raw invocation header is not shown. `m` toggles rendered/raw for the current block. `y` copy and `o` open always use the raw stored text.
 
 Subagent traffic gets structured treatment (via the shared envelope contract in `shared/subagent-envelope.ts`): spawn/resume rows show `name=… agent=…` metadata while the preview and detail show the full task prompt. Result rows keep name, agent, and status first, followed by the remaining envelope fields in canonical order. Rendered result previews and details show the delivered response first, unwrapped from its `<result>` markers, then a `result details` divider and an aligned metadata table containing the action, session, and worktree tail. Bounded previews keep the response and clip trailing table rows first; raw mode, copy, and open keep the stored envelope unchanged.
+
 
 ## Configuration
 
@@ -54,11 +57,13 @@ Environment variables override the file:
 
 Unknown keys, invalid values, and shortcuts reserved by Pi's main editor fail when the extension loads.
 
+
 ## Indexed content
 
 Version 1 indexes user text, assistant text, merged tool calls/results, orphan tool results, user bash executions, visible custom messages, compaction summaries, branch summaries, and labels attached to those blocks. It intentionally excludes assistant thinking, hidden custom messages, extension state entries, model/thinking changes, and session metadata. Images are represented only by `[image]`; base64 and tool `details` payloads are never searchable.
 
 Future extractors can add those excluded content kinds without changing the picker or matcher.
+
 
 ## Verification fixture
 

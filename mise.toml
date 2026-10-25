@@ -6,6 +6,7 @@ lockfile_platforms = ["linux-x64", "macos-arm64"]
 
 [tools]
 node = "22.23.3"
+"npm:markdownlint-cli2" = "0.24.0"
 
 [env]
 _.path = ["{{config_root}}/node_modules/.bin"]
@@ -38,6 +39,10 @@ description = "Run type-aware correctness checks on tracked TypeScript."
 depends = ["install-dependencies"]
 run = "git ls-files -z -- '*.ts' | xargs -0 oxlint"
 
+[tasks.lint-markdown]
+description = "Lint tracked Markdown using the shared Markdown rules."
+run = "git ls-files -z -- '*.md' '*.markdown' | xargs -0 markdownlint-cli2"
+
 [tasks.test]
 description = "Run the TypeScript tests."
 depends = ["install-dependencies"]
@@ -45,7 +50,7 @@ run = "node --test */tests/*-test.ts"
 
 [tasks.check]
 description = "Run all non-mutating checks."
-depends = ["fmt-check", "lint", "build", "test"]
+depends = ["fmt-check", "lint", "lint-markdown", "build", "test"]
 
 [tasks.clean]
 description = "Remove generated TypeScript metadata."

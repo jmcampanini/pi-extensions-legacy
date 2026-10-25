@@ -1,11 +1,12 @@
 # Build and verification
 
-- Run tasks with `mise run <task>`; do not call `node`, `npm`, `tsc`, `prettier`, or `oxlint` directly.
+- Run tasks with `mise run <task>`; do not call `node`, `npm`, `tsc`, `prettier`, `oxlint`, or `markdownlint-cli2` directly.
 - Bump Node with `mise upgrade --bump node`, run `mise lock` and `mise run check`, set `engines.node` in `package.json` to the same version, and commit `mise.toml`, `mise.lock`, and `package.json`.
 - Do not rely on global Prettier or Oxlint installations.
 - Run `mise run check` before handing off changes.
 - Use `mise run fmt` to format tracked TypeScript files. Keep formatting out of `mise run check`.
 - Keep Oxlint's correctness rules enabled. The Node test runner owns promises returned by imported `describe`, `it`, and `test` calls, so the test-only lint configuration permits those calls without awaiting them.
+
 
 # When writing tests
 
@@ -13,13 +14,14 @@
 - Never hand-roll assertion helpers, pass/fail counters, or `process.exit` - a top-level `process.exit(0)` makes `node --test` report a file as passing even when its tests fail. Skip unavailable-dependency tests with the `skip` option instead.
 - Test files live at `<extension>/tests/<name>-test.ts` and stay standalone: both `mise exec -- node <file>` and `mise exec -- node --test <file>` work. `mise run test` runs `node --test "*/tests/*-test.ts"` with one process per file, in parallel - mutate `process.env` before a dynamic `await import(...)` only at module top, and clean up in `after()` hooks.
 
+
 # When designing Pi TUI surfaces
 
 - Prefer Pi's native presentation patterns. Use the default boxed shell when available; when self-rendering a card-like surface, start with `Box(1, 1)` and the matching theme background unless the design explicitly requires different spacing.
 - Follow Pi's native tool typography using semantic theme tokens:
   - Render a tool keyword or title with `theme.fg("toolTitle", theme.bold(...))`.
   - Render its primary argument or path unbolded with `theme.fg("accent", ...)`.
-  - Render secondary metadata unbolded with `theme.fg("muted", ...)`. For example, Bash renders ` (timeout 300s)` this way.
+  - Render secondary metadata unbolded with `theme.fg("muted", ...)`. For example, Bash renders `(timeout 300s)` this way, with a leading space separating it from the command.
   - Use `theme.fg("dim", ...)` for tertiary previews, hints, and less important metadata.
   - Render tool body output with `theme.fg("toolOutput", ...)`.
 - In TUI code, use semantic theme tokens rather than palette names or literal colors. Palette-specific mappings belong in theme JSON.
