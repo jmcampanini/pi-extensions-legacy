@@ -26,6 +26,7 @@ gpt-5.6-sol • f • xhigh
 gpt-5.6-sol • xhigh          # Fast mode disabled
 ```
 
+
 ## Issue inference
 
 The footer checks explicit issue markers in the current branch, then the cwd basename. A candidate is displayed only after `gh issue view` verifies it.
@@ -43,6 +44,7 @@ Configure replacement patterns in `~/.pi/agent/adaptive-footer.json`, or under `
 Patterns are tried in order and must contain a named `number` capture. The configured array replaces the defaults; use an empty array to disable issue inference.
 
 The default recognizes explicit `issue` and `issues` markers such as `feature/issue-456`, `issues/456`, and `issue#456`.
+
 
 ## Extension statuses
 

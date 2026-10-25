@@ -2,6 +2,7 @@
 
 `interactive-subagents` gives Pi visible, controllable parallelism by running bounded tasks as real Pi sessions in tmux panes.
 
+
 ## Design goals
 
 - Keep delegation observable: watch a child or type in its pane to take over.
@@ -10,6 +11,7 @@
 - Provide one primitive, not a workflow engine. Use it for independent work, not trivial, tightly coupled, or critical-path tasks. Children cannot spawn children.
 
 The parent assigns work, the child owns its conversation and pane, and the result returns to the parent on its own, waking it in a new turn. Ending the parent turn is how the model waits: while children run it works only on tasks that need nothing from them, and when its next step depends on a result it says what it is waiting on and ends its turn. This waiting contract is stated positively everywhere the model reads it - the tool texts and a static block injected into the parent's system prompt alongside the agent catalogue.
+
 
 ## First run
 
@@ -43,6 +45,7 @@ subagent_spawn({
 
 This uses the listed `worker` in the parent's working directory with explicit new context, automatic exit, and no worktree. It returns `started`; the answer arrives on its own in a new parent turn.
 
+
 ## Choose where context comes from
 
 | Need | Choice |
@@ -51,6 +54,7 @@ This uses the listed `worker` in the parent's working directory with explicit ne
 | Parent discussion or decisions would be difficult or lossy to restate | Use `context: "forked"`. It copies completed parent history as of the moment the child launches - immediately when a concurrency slot is free, or when a queued launch starts. That history goes to the child's selected model and provider, so do not fork unnecessary or sensitive context. A first-turn fork may fail before the parent session is written. |
 | Follow-up depends on a child's findings or tool history | Use `subagent_resume` to continue that child's conversation. |
 | A human should drive the pane | Set `autoExit: false`. The child normally finishes by calling `subagent_done`, or can ask for help with `caller_ping`. |
+
 
 ## Model-facing tools
 
@@ -66,6 +70,7 @@ A blocked child calls `caller_ping` and exits. Its question wakes the parent, wh
 
 The parent needs no discovery round trip: its system prompt ends with a compact catalogue of the effective agents for the working directory, one line per agent with its `description` and routing markers (`default`, `interactive`, `external: <name>`, `new-only`, or `not spawnable`), then the usable Pi model ids, then the static waiting contract (results arrive on their own; ending the turn is how the model waits). The model list is the session's scoped models (Pi's `enabledModels` setting or `--models` flag, the same set `/scoped-models` shows) as exact `provider/model` ids; an unscoped session lists every model whose provider has credentials, bounded to 20 rows plus a `+N more` pointer. The list names Pi models only: external-harness agents take `model` verbatim in their own tool's names. The contract text never changes, so it adds no prompt-cache churn beyond the catalogue's own. Each injected description is flattened to one line and truncated to 200 characters with an ellipsis, so a definition cannot grow the parent's context; the source text stays intact for the detailed surfaces. The catalogue is a snapshot taken at session start (including `/reload`, `/new`, and `/resume`) and refreshed whenever `subagent_available` or `/subagent-available` computes a fresh inventory. A snapshot that lags a mid-session file edit blocks nothing, because `subagent_spawn` reads definitions from disk at call time.
 
+
 ## Agent definitions and trust
 
 Definition filename stems are agent identifiers; their Markdown bodies extend the child system prompt. Identifiers are non-empty, contain no whitespace, and occupy at most 20 terminal display columns. Task display names remain free-form and may contain spaces. Only definition files with valid identifiers are discovered, and explicit invalid `agent` values are rejected. `<cwd>/.pi/subagents/` shadows `$PI_CODING_AGENT_DIR/subagents/`, normally `~/.pi/agent/subagents/`. A repository can replace `worker`, so inspect `.pi/subagents/` in untrusted repositories.
@@ -73,6 +78,7 @@ Definition filename stems are agent identifiers; their Markdown bodies extend th
 Optional frontmatter keys are `description`, `details`, `models`, `thinking`, `tools`, `context`, `auto-exit`, `worktree`, `harness`, and `harness-pass-through`. Omitted model, thinking, and tools settings inherit Pi defaults; the other defaults are `new`, `true`, `false`, and `pi`. A model list is tried in order until a usable exact match is found (external harnesses instead take the first entry verbatim; see External harnesses). Call values override frontmatter, which overrides built-in defaults.
 
 `description` is the compact routing text: one sentence for the parent's injected catalogue, where it renders bounded to 200 characters. `details` is an optional expanded explanation for humans and explicit discovery, shown untruncated by `subagent_available` and beneath the description headline in `/subagent-available`. When it is absent, `subagent_available` shows the full `description` instead and the overview keeps its headline-only card, so description-only definitions work unchanged.
+
 
 ## External harnesses
 
@@ -106,6 +112,7 @@ Observability caveat: Claude Code fires no lifecycle notifier when a human inter
 
 Intentionally not included in v1: tools beyond Claude Code (the profile registry accepts more later), per-run cost and context-size reporting, mid-run help requests (`caller_ping`), forked context, the in-pane identity banner, and pane-content-based liveness for tools without lifecycle notifiers.
 
+
 ## Concurrency and the launch queue
 
 At most `maxConcurrentSubagents` children run at once (default 9 - the most panes the dedicated tmux window tiles legibly). The limit counts every child holding a pane: autonomous, interactive, and external-harness children alike, from spawns and resumes. Children whose result is still `delivering` have already released their pane and do not count.
@@ -114,6 +121,7 @@ A launch past the limit is queued, not rejected: the tool call returns `queued` 
 
 Because side effects wait for the slot, a queued launch can fail when it finally starts (its directory vanished, tmux refused a pane). The failure arrives as a message naming the child, the error, and what to do - the entry is removed and nothing half-started is left behind. Both launch tool descriptions advertise the effective configured limit, and `/reload` preserves the queue along with running children; quit, `/new`, and `/resume` discard it.
 
+
 ## Parallel edit safety
 
 Never give parallel children overlapping write scopes in one checkout. Assign disjoint files or use `worktree: true`.
@@ -121,6 +129,7 @@ Never give parallel children overlapping write scopes in one checkout. Assign di
 The built-in creator makes a worktree under `<repo>/.pi/worktrees/` on a `pi/<name>` branch. Custom creators may use another location or detached HEAD.
 
 Cleanup favors leftovers over lost work. `auto` removes only a successful, provably unchanged worktree. Files, commits, failure, stop, crash, or unverifiable state keep it. Results report the location, optional branch, and outcome for inspection or merging.
+
 
 ## Observe, control, and receive results
 
@@ -151,6 +160,7 @@ Completion, failure, user stop, and help are explicit. Results include resume gu
 Results reach the parent through Pi's steering queue. Under Pi's default `steeringMode` setting, `"one-at-a-time"`, queued results deliver one per turn boundary, so several children finishing while the parent is working arrive spread across its following turns, each answered separately. Set `steeringMode` to `"all"` in Pi's settings to receive every queued result at the next boundary at once.
 
 A successful `/reload` preserves running children, pending cleanup and delivery, and short ids within the same parent Pi process. If the replacement extension fails to load, preserved children are stopped after a 30-second handoff timeout. Quit, `/new`, `/resume`, `/fork`, crashes, and process restarts do not reconstruct live supervision, though session files and retained worktrees survive where possible. If sending a result throws, the next normally completed parent run or a later successful `/reload` retries it. Escape can drop a result queued behind a streaming parent, leaving its row in `delivering` temporarily. After the next normally completed parent run proves the queued copy is gone, the extension redelivers it; each row clears when its result actually lands, without duplicating outcomes.
+
 
 ## Configuration
 

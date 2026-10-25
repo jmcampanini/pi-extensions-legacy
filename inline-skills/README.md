@@ -2,9 +2,10 @@
 
 Codex-style `$skill-name` mentions for Pi: fuzzy-autocomplete any installed skill anywhere in a message, and have it expand through Pi's native `/skill:` machinery at submit time.
 
+
 ## Usage
 
-Type `$` anywhere in the editor - start of the message, mid-sentence, any line. A popup lists installed skills (name + description), narrowing with fuzzy matching as you type. Accepting inserts `$skill-name ` and you keep writing.
+Type `$` anywhere in the editor - start of the message, mid-sentence, any line. A popup lists installed skills (name + description), narrowing with fuzzy matching as you type. Accepting inserts `$skill-name` followed by a space, and you keep writing.
 
 On submit, a message like
 
@@ -19,6 +20,7 @@ is rewritten to
 ```
 
 Pi then inlines the SKILL.md as its native `<skill>` block and renders the collapsed `[skill]` row, with your sentence (sigil kept, exactly as typed) as the trailing message.
+
 
 ## Rules
 
